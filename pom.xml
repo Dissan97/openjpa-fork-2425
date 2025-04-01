@@ -106,6 +106,40 @@
         <jakarta.validation-api.version>3.0.2</jakarta.validation-api.version>
         <jakarta.jms-api.version>3.1.0</jakarta.jms-api.version>
 
+        <!-- [DISSAN FUNCTIONALITY] Added properties for project code_coverage -->
+        <redirectTestOutputToFile>true</redirectTestOutputToFile>
+        <testRetryCount>2</testRetryCount>
+        <forkCount.variable>1</forkCount.variable>
+        <sonar.organization>it.uniroma2.ahmed</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ../jacoco-report/target/site/jacoco-aggregate/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
+        <test.additional.args>
+            --add-opens java.base/java.io=ALL-UNNAMED
+            --add-opens java.base/java.lang=ALL-UNNAMED
+            --add-opens java.base/java.lang.reflect=ALL-UNNAMED
+            --add-opens java.base/java.net=ALL-UNNAMED
+            --add-opens java.base/java.nio=ALL-UNNAMED
+            --add-opens java.base/java.nio.channels.spi=ALL-UNNAMED
+            --add-opens java.base/java.nio.file=ALL-UNNAMED
+            --add-opens java.base/java.util=ALL-UNNAMED
+            --add-opens java.base/java.util.concurrent=ALL-UNNAMED
+            --add-opens java.base/java.util.concurrent.atomic=ALL-UNNAMED
+            --add-opens java.base/java.util.concurrent.locks=ALL-UNNAMED
+            --add-opens java.base/java.util.stream=ALL-UNNAMED
+            --add-opens java.base/java.util.zip=ALL-UNNAMED
+            --add-opens java.base/java.time=ALL-UNNAMED
+            --add-opens java.base/jdk.internal.loader=ALL-UNNAMED
+            --add-opens java.base/sun.net.dns=ALL-UNNAMED
+            --add-opens java.base/sun.nio.ch=ALL-UNNAMED
+            --add-opens java.base/sun.security.jca=ALL-UNNAMED
+            --add-opens java.xml/jdk.xml.internal=ALL-UNNAMED
+        </test.additional.args>
+        <argLine>-Xmx2G -Djwava.net.preferIPv4Stack=true -Dio.netty.leakDetection.level=paranoid ${test.additional.args}</argLine>
+        <version.jacoco-maven-plugin>0.8.12</version.jacoco-maven-plugin>
+        <version.pitest-maven>1.17.4</version.pitest-maven>
+
     </properties>
 
     <licenses>
@@ -186,6 +220,7 @@
         <module>openjpa-kubernetes</module>
         <module>openjpa</module>
         <module>openjpa-project</module>
+        <module>jacoco-report</module>
         <!--<module>openjpa-examples</module>
         <module>openjpa-integration</module>
         <module>openjpa-all</module>
@@ -1757,6 +1792,31 @@
             </repositories>
         </profile>
 
+        <!-- [DISSAN] JACOCO PROFILE -->
+        <profile>
+            <id>jacoco-profile</id>
+            <properties>
+                <argLine>-Xmx2G -Djwava.net.preferIPv4Stack=true -Dio.netty.leakDetection.level=paranoid ${test.additional.args}</argLine>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${version.jacoco-maven-plugin}</version>
+                        <executions>
+                            <execution>
+                                <id>jacoco-prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
     </profiles>
 
     <!-- default versions for dependencies that child modules may include -->
@@ -1971,7 +2031,7 @@
                         </additionalJOption>
                     </configuration>
                 </plugin>
-                <plugin>
+             <!--   <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.version}</version>
@@ -1980,10 +2040,10 @@
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <trimStackTrace>false</trimStackTrace>
                         <useSystemClassLoader>true</useSystemClassLoader>
-                        <excludes>
+                        <excludes> -->
                             <!-- exclude classes that include a $; inner classes
                                  are not test cases per OpenJPA standards -->
-                            <exclude>org/apache/openjpa/**/*$*.class</exclude>
+                            <!-- <exclude>org/apache/openjpa/**/*$*.class</exclude>
                         </excludes>
                     <systemProperties>
                         <property>
@@ -2040,16 +2100,11 @@
                         </property>
                     </systemProperties>
                     </configuration>
-                </plugin>
+                </plugin> -->
                 <plugin>
                     <groupId>io.fabric8</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
                     <version>0.45.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-report-plugin</artifactId>
-                    <version>${maven.surefire.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -2078,11 +2133,13 @@
                         </execution>
                     </executions>
                 </plugin>
+                <!-- [DISSAN REMOVE]
                 <plugin>
                     <groupId>org.apache.rat</groupId>
                     <artifactId>apache-rat-plugin</artifactId>
                     <version>0.16.1</version>
                 </plugin>
+                -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
@@ -2217,6 +2274,22 @@
                     <artifactId>docbkx-maven-plugin</artifactId>
                     <version>2.0.17</version>
                 </plugin>
+                <!-- [DISSAN ADDED]-->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${version.maven-surefire}</version>
+                    <configuration>
+                        <argLine>@{argLine}</argLine>
+                        <redirectTestOutputToFile>${redirectTestOutputToFile}</redirectTestOutputToFile>
+                        <forkCount>${forkCount.variable}</forkCount>
+                        <reuseForks>false</reuseForks>
+                        <trimStackTrace>false</trimStackTrace>
+                        <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
+                        <rerunFailingTestsCount>${testRetryCount}</rerunFailingTestsCount>
+
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -2309,6 +2382,7 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--
             <plugin>
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
@@ -2324,12 +2398,16 @@
                     <excludeSubProjects>false</excludeSubProjects>
                     <numUnapprovedLicenses>0</numUnapprovedLicenses>
                     <excludes>
+                    -->
                         <!-- generated content -->
+            <!--
                         <exclude>**/.*/**</exclude>
                         <exclude>**/target/**/*</exclude>
                     </excludes>
                     <includes>
+                    -->
                         <!-- only check common source files -->
+            <!--
                         <include>**/src/**/*.bat</include>
                         <include>**/src/**/*.css</include>
                         <include>**/src/**/*.html</include>
@@ -2344,6 +2422,7 @@
                     </includes>
                 </configuration>
             </plugin>
+        -->
         </plugins>
     </build>
 
