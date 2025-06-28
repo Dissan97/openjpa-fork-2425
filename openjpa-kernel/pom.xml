@@ -74,6 +74,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.14.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <!--
                 This is only used for implementing WASManagedRuntime
                 which implements the
@@ -86,6 +93,8 @@
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
+
+
     </dependencies>
 
     <build>
@@ -174,7 +183,54 @@
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
+    <!-- Evosuite DISSAN
+
+
+
+    -->
+
+    <profiles>
+        <profile>
+            <id>evosuite</id>
+            <properties>
+                <targetClass>org.apache.openjpa.util.ProxyManagerImpl</targetClass>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.evosuite.plugins</groupId>
+                        <artifactId>evosuite-maven-plugin</artifactId>
+                        <version>1.2.1-SNAPSHOT</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>
+                                        prepare
+                                    </goal>
+                                </goals>
+                                <phase>process-test-classes</phase>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <timeInMinutesPerClass>1</timeInMinutesPerClass>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.4.1</version>
+                        <configuration>
+                            <mainClass>org.apache.openjpa.util.ProxyManagerImpl</mainClass>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+
+        </profile>
+    </profiles>
 
 </project>
