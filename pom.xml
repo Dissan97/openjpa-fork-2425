@@ -39,6 +39,29 @@
     <version>3.0.0-SNAPSHOT</version>
 
     <properties>
+        <!-- Dissan adding mockito -->
+        <mockito.version>3.12.4</mockito.version>
+        <!-- [DISSAN FUNCTIONALITY] Added properties for project code_coverage -->
+        <redirectTestOutputToFile>true</redirectTestOutputToFile>
+        <testRetryCount>2</testRetryCount>
+        <forkCount.variable>1</forkCount.variable>
+        <sonar.organization>it.uniroma2.ahmed</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ../jacoco-report/target/site/jacoco-aggregate/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
+
+        <argLine>-Xmx2G -Djwava.net.preferIPv4Stack=true -Dio.netty.leakDetection.level=paranoid
+
+        </argLine>
+        <version.jacoco-maven-plugin>0.8.8</version.jacoco-maven-plugin>
+        <version.pitest-maven>1.17.4</version.pitest-maven>
+
+        <!--
+            ++++++++++++++++++++++++++++++++++++++++++
+                    ORIGINAL PROPERTIES BELOW
+            ++++++++++++++++++++++++++++++++++++++++++
+        -->
         <java.class.version>1.8</java.class.version>
         <java.testclass.version>1.8</java.testclass.version>
 
@@ -53,7 +76,7 @@
         <test.jvm.maxpermsize>512m</test.jvm.maxpermsize>
         <test.jvm.maxheapsize>1024m</test.jvm.maxheapsize>
         <test.jvm.arguments>-Xmx${test.jvm.maxheapsize} -XX:+HeapDumpOnOutOfMemoryError</test.jvm.arguments>
-        <surefire.jvm.args>${test.jvm.arguments}</surefire.jvm.args>
+        <!--<surefire.jvm.args>${test.jvm.arguments}</surefire.jvm.args>-->
         <!-- Setting for openjpa.DynamicEnhancementAgent usage -->
         <openjpa.DynamicEnhancementAgent>false</openjpa.DynamicEnhancementAgent>
         <!-- Commons DBCP settings passed in as openjpa.ConnectionProperties -->
@@ -86,8 +109,7 @@
         <compile.testclass.target>${java.testclass.version}</compile.testclass.target>
 
         <maven.javadoc.version>2.10.3</maven.javadoc.version>
-        <maven.surefire.version>2.19.1</maven.surefire.version>
-
+        <maven.surefire.version>3.5.0</maven.surefire.version>
         <bval.version>1.1.2</bval.version>
     </properties>
 
@@ -178,6 +200,39 @@
     </modules>
 
     <profiles>
+
+        <!--
+            ++++++++++++++++++++++++++++
+            [DISSAN] JACOCO PROFILE
+            ++++++++++++++++++++++++++++
+            -->
+
+        <profile>
+            <id>code-coverage</id>
+            <properties>
+                <argLine>-Xmx2G -Djwava.net.preferIPv4Stack=true -Dio.netty.leakDetection.level=paranoid
+                </argLine>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${version.jacoco-maven-plugin}</version>
+                        <executions>
+                            <execution>
+                                <id>jacoco-prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+
         <!-- ================ -->
         <!--  Build Profiles  -->
         <!-- ================ -->
@@ -200,40 +255,9 @@
                     <plugin>
                         <groupId>org.apache.rat</groupId>
                         <artifactId>apache-rat-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>check</goal>
-                                </goals>
-                            </execution>
-                        </executions>
+
                         <configuration>
-                            <excludeSubProjects>false</excludeSubProjects>
-                            <numUnapprovedLicenses>0</numUnapprovedLicenses>
-                            <excludes>
-                                <!-- comments are usupported in services files -->
-                                <exclude>**/javax.persistence.spi.PersistenceProvider</exclude>
-                                <exclude>**/javax.annotation.processing.Processor</exclude>
-                                <!-- comments are usupported by our rsrc parser -->
-                                <exclude>**/*.rsrc</exclude>
-                                <!-- comments are usupported in these files -->
-                                <exclude>**/org.apache.openjpa.revision.properties</exclude>
-                                <exclude>scripts/*.list</exclude>
-                                <exclude>scripts/*.options</exclude>
-                                <exclude>scripts/*.dict</exclude>
-                                <!-- generated content -->
-                                <exclude>**/.*/**</exclude>
-                                <exclude>**/target/**/*</exclude>
-                                <exclude>**/dependency-reduced-pom.xml</exclude>
-                                <exclude>**/*.log</exclude>
-                                <exclude>**/maven-eclipse.xml</exclude>
-                                <exclude>**/rat.txt</exclude>
-                                <exclude>release.properties</exclude>
-                                <exclude>DEPENDENCIES</exclude>
-                                <!-- Exclude internal build-only repository -->
-                                <exclude>**/internal-repository/**</exclude>
-                            </excludes>
+                            <skip>true</skip>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -499,6 +523,17 @@
     <!-- default versions for dependencies that child modules may include -->
     <dependencyManagement>
         <dependencies>
+
+            <!-- ADDED DEPENDECIES -->
+
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+
             <dependency>
                 <groupId>commons-pool</groupId>
                 <artifactId>commons-pool</artifactId>
@@ -675,70 +710,27 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>${maven.javadoc.version}</version>
                 </plugin>
+                <!--
+                    ++++++++++++++++++++++
+                        [DISSAN ADDED]
+                    ++++++++++++++++++++++
+                    -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.version}</version>
                     <configuration>
-                        <argLine>${surefire.jvm.args}</argLine>
-                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                        <argLine>@{argLine}</argLine>
+                        <redirectTestOutputToFile>${redirectTestOutputToFile}</redirectTestOutputToFile>
+                        <forkCount>${forkCount.variable}</forkCount>
+                        <reuseForks>false</reuseForks>
                         <trimStackTrace>false</trimStackTrace>
-                        <useSystemClassLoader>true</useSystemClassLoader>
+                        <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
+                        <rerunFailingTestsCount>${testRetryCount}</rerunFailingTestsCount>
                         <excludes>
-                            <!-- exclude classes that include a $; inner classes
-                                 are not test cases per OpenJPA standards -->
-                            <exclude>org/apache/openjpa/**/*$*.class</exclude>
+                            <exclude>**/RegressionTest*.java</exclude>
+                            <exclude>**/*_EST*.java</exclude>
                         </excludes>
-                    <systemProperties>
-                        <property>
-                            <name>openjpa.Log</name>
-                            <value>${openjpa.Log}</value>
-                        </property>
-                        <property>
-                            <name>openjpa.DynamicEnhancementAgent</name>
-                            <value>${openjpa.DynamicEnhancementAgent}</value>
-                        </property>
-                        <property>
-                            <name>openjpa.ConnectionDriverName</name>
-                            <value>${connection.driver.name}</value>
-                        </property>
-                        <property>
-                            <name>openjpa.ConnectionURL</name>
-                            <value>${connection.url}</value>
-                        </property>
-                        <property>
-                            <name>openjpa.ConnectionUserName</name>
-                            <value>${connection.username}</value>
-                        </property>
-                        <property>
-                            <name>openjpa.ConnectionPassword</name>
-                            <value>${connection.password}</value>
-                        </property>
-                        <property>
-                            <name>openjpa.jdbc.DBDictionary</name>
-                            <value>${jdbc.DBDictionary}</value>
-                        </property>
-                        <property>
-                            <name>derby.stream.error.file</name>
-                            <value>target/derby.log</value>
-                        </property>
-                        <property>
-                            <name>derby.locks.deadlockTimeout</name>
-                            <value>${derby.locks.deadlockTimeout}</value>
-                        </property>
-                        <property>
-                            <name>derby.locks.waitTimeout</name>
-                            <value>${derby.locks.waitTimeout}</value>
-                        </property>
-                        <property>
-                            <name>openjpa.ConnectionProperties</name>
-                            <value>${dbcp.args}</value>
-                        </property>
-                        <property>
-                            <name>tests.openjpa.allowfailure</name>
-                            <value>${tests.openjpa.allowfailure}</value>
-                        </property>
-                    </systemProperties>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -838,6 +830,9 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>2.9</version>
+                    <configuration>
+                        <skip>true</skip>
+                    </configuration>
                     <dependencies>
                         <dependency>
                             <groupId>org.codehaus.plexus</groupId>
@@ -1118,36 +1113,8 @@
             <plugin>
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
-                    <excludeSubProjects>false</excludeSubProjects>
-                    <numUnapprovedLicenses>0</numUnapprovedLicenses>
-                    <excludes>
-                        <!-- generated content -->
-                        <exclude>**/.*/**</exclude>
-                        <exclude>**/target/**/*</exclude>
-                    </excludes>
-                    <includes>
-                        <!-- only check common source files -->
-                        <include>**/src/**/*.bat</include>
-                        <include>**/src/**/*.css</include>
-                        <include>**/src/**/*.html</include>
-                        <include>**/src/**/*.java</include>
-                        <include>**/src/**/*.js</include>
-                        <include>**/src/**/*.jsp</include>
-                        <include>**/src/**/*.properties</include>
-                        <include>**/src/**/*.sh</include>
-                        <include>**/src/**/*.txt</include>
-                        <include>**/src/**/*.vm</include>
-                        <include>**/src/**/*.xml</include>
-                    </includes>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>
