@@ -22,12 +22,7 @@ jobs:
           cache: maven
       
       - name: Install evosuite-standalone.jar in local Maven repo
-        run: mvn install:install-file \
-          -Dfile=./openjpa-kernel/evosuite-standalone-runtime-1.2.0.jar \
-          -DgroupId=org.evosuite \
-          -DartifactId=evosuite-standalone-runtime \
-          -Dversion=1.2.0\
-          -Dpackaging=jar
+        run: ls -la
 
       
       - name: Build with Maven
