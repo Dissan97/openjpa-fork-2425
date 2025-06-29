@@ -21,8 +21,8 @@ jobs:
           distribution: 'corretto'
           cache: maven
       
-      - name: Install evosuite-standalone.jar in local Maven repo
-        run: ls -la
+      - name: Validate before install
+        run: mvn validate
 
       
       - name: Build with Maven
