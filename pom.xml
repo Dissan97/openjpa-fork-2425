@@ -55,7 +55,7 @@
 
         </argLine>
         <version.jacoco-maven-plugin>0.8.8</version.jacoco-maven-plugin>
-        <version.pitest-maven>1.17.4</version.pitest-maven>
+        <version.pitest-maven>1.15.0</version.pitest-maven>
 
         <!--
             ++++++++++++++++++++++++++++++++++++++++++
@@ -727,10 +727,6 @@
                         <trimStackTrace>false</trimStackTrace>
                         <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
                         <rerunFailingTestsCount>${testRetryCount}</rerunFailingTestsCount>
-                        <excludes>
-                            <exclude>**/RegressionTest*.java</exclude>
-                            <exclude>**/*_EST*.java</exclude>
-                        </excludes>
                     </configuration>
                 </plugin>
                 <plugin>

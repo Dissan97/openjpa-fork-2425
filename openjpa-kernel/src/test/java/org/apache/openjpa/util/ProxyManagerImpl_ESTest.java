@@ -33,8 +33,6 @@ import org.apache.openjpa.datacache.AbstractQueryCache;
 import org.apache.openjpa.kernel.DataCacheRetrieveMode;
 import org.apache.openjpa.kernel.StoreQuery;
 import org.apache.openjpa.lib.util.Options;
-import org.apache.openjpa.util.Proxy;
-import org.apache.openjpa.util.ProxyManagerImpl;
 import org.evosuite.runtime.EvoRunner;
 import org.evosuite.runtime.EvoRunnerParameters;
 import org.evosuite.runtime.mock.java.util.MockDate;
@@ -45,7 +43,7 @@ import org.junit.runner.RunWith;
 import serp.bytecode.BCClass;
 import serp.bytecode.Project;
 
-@RunWith(EvoRunner.class) @EvoRunnerParameters(mockJVMNonDeterminism = true, useVFS = true, useVNET = true, resetStaticState = true, separateClassLoader = true) 
+@RunWith(EvoRunner.class) @EvoRunnerParameters(mockJVMNonDeterminism = true, useVFS = true, useVNET = false, resetStaticState = true, separateClassLoader = true)
 public class ProxyManagerImpl_ESTest extends ProxyManagerImpl_ESTest_scaffolding {
 
   @Test(timeout = 4000)

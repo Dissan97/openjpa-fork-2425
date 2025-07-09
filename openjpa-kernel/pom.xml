@@ -92,6 +92,11 @@
             <artifactId>xbean-asm5-shaded</artifactId>
             <version>3.17</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -202,7 +207,6 @@
     </build>
 
     <profiles>
-
         <profile>
             <id>rand-cov</id>
             <activation>
@@ -210,24 +214,6 @@
             </activation>
             <build>
                 <plugins>
-                    <!-- JaCoCo Agent -->
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>${version.jacoco-maven-plugin}</version>
-                        <executions>
-                            <execution>
-                                <id>prepare-agent</id>
-                                <goals><goal>prepare-agent</goal></goals>
-                            </execution>
-                            <execution>
-                                <id>report</id>
-                                <phase>verify</phase>
-                                <goals><goal>report</goal></goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
                     <!-- Surefire: solo i RegressionTest*.java -->
                     <plugin>
                         <artifactId>maven-surefire-plugin</artifactId>
@@ -241,15 +227,438 @@
                             <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
                             <rerunFailingTestsCount>${testRetryCount}</rerunFailingTestsCount>
                             <includes>
-                                <include>**/RegressionTest*.java</include>
+                                <include>**/RegressionTest</include>
                             </includes>
                             <failIfNoTests>false</failIfNoTests>
                         </configuration>
+                    </plugin>
+
+                    <!-- JaCoCo Agent -->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${version.jacoco-maven-plugin}</version>
+                        <executions>
+                            <execution>
+                                <id>jacoco-prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>verify</phase>
+                                <goals><goal>report</goal></goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
         </profile>
 
+        <profile>
+            <id>pm-cov</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- Surefire: Solo test fatti a mano e generati da LLM -->
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven.surefire.version}</version>
+                        <configuration>
+                            <argLine>@{argLine}</argLine>
+                            <redirectTestOutputToFile>${redirectTestOutputToFile}</redirectTestOutputToFile>
+                            <forkCount>${forkCount.variable}</forkCount>
+                            <reuseForks>false</reuseForks>
+                            <trimStackTrace>false</trimStackTrace>
+                            <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
+                            <rerunFailingTestsCount>${testRetryCount}</rerunFailingTestsCount>
+                            <includes>
+                                <include>**/BAPMCopyTest*</include>
+                                <include>**/BAPMNewCustomProxyTest*</include>
+                                <include>**/LLMProxyManagerCustomTest*</include>
+                            </includes>
+                            <failIfNoTests>false</failIfNoTests>
+                        </configuration>
+                    </plugin>
+
+                    <!-- JaCoCo Agent -->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${version.jacoco-maven-plugin}</version>
+                        <executions>
+                            <execution>
+                                <id>jacoco-prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>verify</phase>
+                                <goals><goal>report</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>ref-auto-cov</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- Surefire: Solo test fatti a mano e generati da LLM -->
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven.surefire.version}</version>
+                        <configuration>
+                            <argLine>@{argLine}</argLine>
+                            <redirectTestOutputToFile>${redirectTestOutputToFile}</redirectTestOutputToFile>
+                            <forkCount>${forkCount.variable}</forkCount>
+                            <reuseForks>false</reuseForks>
+                            <trimStackTrace>false</trimStackTrace>
+                            <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
+                            <rerunFailingTestsCount>${testRetryCount}</rerunFailingTestsCount>
+                            <includes>
+                                <include>**/enhance/**</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/enhance/BAReflection*</exclude>
+                                <exclude>**/enhance/CCReflection*</exclude>
+                            </excludes>
+                            <failIfNoTests>false</failIfNoTests>
+                        </configuration>
+                    </plugin>
+
+                    <!-- JaCoCo Agent -->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${version.jacoco-maven-plugin}</version>
+                        <executions>
+                            <execution>
+                                <id>jacoco-prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>verify</phase>
+                                <goals><goal>report</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>evo-pm-cov</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- Surefire: Solo test fatti a mano e generati da LLM -->
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven.surefire.version}</version>
+                        <configuration>
+                            <argLine>@{argLine}</argLine>
+                            <redirectTestOutputToFile>${redirectTestOutputToFile}</redirectTestOutputToFile>
+                            <forkCount>${forkCount.variable}</forkCount>
+                            <reuseForks>false</reuseForks>
+                            <trimStackTrace>false</trimStackTrace>
+                            <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
+                            <rerunFailingTestsCount>${testRetryCount}</rerunFailingTestsCount>
+                            <includes>
+                                <include>**/util/ProxyManagerImpl_ESTest*</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/enhance/BAReflection*</exclude>
+                                <exclude>**/enhance/CCReflection*</exclude>
+                            </excludes>
+                            <failIfNoTests>false</failIfNoTests>
+                        </configuration>
+                    </plugin>
+
+                    <!-- JaCoCo Agent -->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${version.jacoco-maven-plugin}</version>
+                        <executions>
+                            <execution>
+                                <id>jacoco-prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>verify</phase>
+                                <goals><goal>report</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>rand-ref-cov</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- Surefire: Solo test fatti a mano e generati da LLM -->
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven.surefire.version}</version>
+                        <configuration>
+                            <argLine>@{argLine}</argLine>
+                            <redirectTestOutputToFile>${redirectTestOutputToFile}</redirectTestOutputToFile>
+                            <forkCount>${forkCount.variable}</forkCount>
+                            <reuseForks>false</reuseForks>
+                            <trimStackTrace>false</trimStackTrace>
+                            <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
+                            <rerunFailingTestsCount>${testRetryCount}</rerunFailingTestsCount>
+                            <includes>
+                                <include>**/enhance/RegressionTest</include>
+                            </includes>
+
+                            <failIfNoTests>false</failIfNoTests>
+                        </configuration>
+                    </plugin>
+
+                    <!-- JaCoCo Agent -->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${version.jacoco-maven-plugin}</version>
+                        <executions>
+                            <execution>
+                                <id>jacoco-prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>verify</phase>
+                                <goals><goal>report</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>llm-ref-cov</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- Surefire: Solo test fatti a mano e generati da LLM -->
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven.surefire.version}</version>
+                        <configuration>
+                            <argLine>@{argLine}</argLine>
+                            <redirectTestOutputToFile>${redirectTestOutputToFile}</redirectTestOutputToFile>
+                            <forkCount>${forkCount.variable}</forkCount>
+                            <reuseForks>false</reuseForks>
+                            <trimStackTrace>false</trimStackTrace>
+                            <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
+                            <rerunFailingTestsCount>${testRetryCount}</rerunFailingTestsCount>
+                            <includes>
+                                <include>**/enhance/**</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/enhance/*RegressionTest*</exclude>
+                                <exclude>**/enhance/*_ES*</exclude>
+                            </excludes>
+                            <failIfNoTests>false</failIfNoTests>
+                        </configuration>
+                    </plugin>
+
+                    <!-- JaCoCo Agent -->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${version.jacoco-maven-plugin}</version>
+                        <executions>
+                            <execution>
+                                <id>jacoco-prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>verify</phase>
+                                <goals><goal>report</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!--
+        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                PIT MUTATION COVERAGE
+        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        -->
+        <profile>
+            <id>pm-pit</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <!-- For incremental analysis this should be commented out -->
+                <!-- <withHistory>true</withHistory> -->
+                <pitest.history.file>${project.build.directory}/pitest.history</pitest.history.file>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <version>${version.pitest-maven}</version>
+                        <configuration>
+                            <verbose>false</verbose>
+                            <threads>8</threads>
+                            <targetClasses>
+                                <param>org.apache.openjpa.util.ProxyManagerImpl</param>
+                            </targetClasses>
+                            <targetTests>
+                                <targetTest>org.apache.openjpa.util.BAPMCopyTest</targetTest>
+                                <targetTest>org.apache.openjpa.util.BAPMNewCustomProxyTest</targetTest>
+                                <targetTest>org.apache.openjpa.util.LLMProxyManagerCustomTest</targetTest>
+                            </targetTests>
+                            <avoidCallsTo>
+                                <avoidCallsTo>org.slf4j</avoidCallsTo>
+                            </avoidCallsTo>
+                            <historyInputFile>${pitest.history.file}</historyInputFile>
+                            <historyOutputFile>${pitest.history.file}</historyOutputFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>Generate PIT report</id>
+                                <phase>test-compile</phase>
+                                <goals>
+                                    <goal>mutationCoverage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>ref-pit</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <!-- For incremental analysis this should be commented out -->
+                <!-- <withHistory>true</withHistory> -->
+                <pitest.history.file>${project.build.directory}/pitest.history</pitest.history.file>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <version>${version.pitest-maven}</version>
+                        <configuration>
+                            <verbose>false</verbose>
+                            <threads>8</threads>
+                            <targetClasses>
+                                <param>org.apache.openjpa.enhance.Reflection</param>
+                            </targetClasses>
+                            <targetTests>
+                                <targetTest>org.apache.openjpa.enhance.ReflectionCCTest</targetTest>
+                                <targetTest>org.apache.openjpa.enhance.ReflectionGetBeanPropertyTest</targetTest>
+                                <targetTest>org.apache.openjpa.enhance.ReflectionParameterizedTest</targetTest>
+                                <targetTest>org.apache.openjpa.enhance.MutationLLMTest</targetTest>
+                                <targetTest>org.apache.openjpa.enhance.RegressionTest</targetTest>
+                            </targetTests>
+                            <avoidCallsTo>
+                                <avoidCallsTo>org.slf4j</avoidCallsTo>
+                            </avoidCallsTo>
+                            <historyInputFile>${pitest.history.file}</historyInputFile>
+                            <historyOutputFile>${pitest.history.file}</historyOutputFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>Generate PIT report</id>
+                                <phase>test-compile</phase>
+                                <goals>
+                                    <goal>mutationCoverage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>rndpm-pit</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <!-- For incremental analysis this should be commented out -->
+                <!-- <withHistory>true</withHistory> -->
+                <pitest.history.file>${project.build.directory}/pitest.history</pitest.history.file>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <version>${version.pitest-maven}</version>
+                        <configuration>
+                            <verbose>false</verbose>
+                            <threads>8</threads>
+                            <targetClasses>
+                                <param>org.apache.openjpa.util.ProxyManagerImpl</param>
+                            </targetClasses>
+                            <targetTests>
+                                <targetTest>RegressionTest</targetTest>
+                            </targetTests>
+                            <avoidCallsTo>
+                                <avoidCallsTo>org.slf4j</avoidCallsTo>
+                            </avoidCallsTo>
+                            <historyInputFile>${pitest.history.file}</historyInputFile>
+                            <historyOutputFile>${pitest.history.file}</historyOutputFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>Generate PIT report</id>
+                                <phase>test-compile</phase>
+                                <goals>
+                                    <goal>mutationCoverage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <repositories>
